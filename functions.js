@@ -26,7 +26,7 @@ function lookupValue(data, identifier, date) {
             return data[i].Value;
         }
     }
-    return "Not found";
+    return "Error: Not found";
 }
 
 async function getData(identifier, date) {
@@ -43,7 +43,7 @@ async function getData(identifier, date) {
         var dtIsSingle = (dtRows === 1 && dtCols === 1);
         
         if (!idIsSingle && !dtIsSingle && (idRows !== dtRows || idCols !== dtCols)) {
-            return [["Error: Dimension mismatch - ranges must be same size or single cell"]];
+            return [["Error: Dimension mismatch"]];
         }
         
         // Use dimensions from the larger input (or the non-single one)
