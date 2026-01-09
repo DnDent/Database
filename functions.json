@@ -3,11 +3,11 @@
     {
       "id": "DATA",
       "name": "DATA",
-      "description": "Haalt Value op uit SharePoint op basis van Identifier en Date.",
-      "result": { "type": "any", "dimensionality": "matrix" },
+      "description": "Lookup value by Identifier and Date",
+      "result": { "type": "any" },
       "parameters": [
-        { "name": "Identifier", "type": "any", "dimensionality": "matrix" },
-        { "name": "Date", "type": "any", "dimensionality": "matrix" }
+        { "name": "identifier", "type": "string", "description": "Row identifier" },
+        { "name": "date", "type": "string", "description": "Date (YYYY-MM-DD)" }
       ]
     }
   ]
