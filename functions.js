@@ -33,20 +33,23 @@ async function getData(identifier, date) {
     try {
         var data = await loadData();
         
-        // With dimensionality: "matrix", Excel ALWAYS passes 2D arrays
-        // Single cell "TEST001" comes as [["TEST001"]]
-        // Range A1:A3 comes as [["val1"], ["val2"], ["val3"]]
-        
-        var numRows = identifier.length;
-        var numCols = identifier[0].length;
+        // Get dimensions - use MAX of both inputs
+        var numRows = Math.max(identifier.length, date.length);
+        var numCols = Math.max(identifier[0].length, date[0].length);
         
         // Build result matrix
         var result = [];
         for (var row = 0; row < numRows; row++) {
             var resultRow = [];
             for (var col = 0; col < numCols; col++) {
-                var id = identifier[row][col];
-                var dt = date[row][col];
+                // If one input is smaller, reuse its value (e.g., single cell applies to all)
+                var idRow = row < identifier.length ? row : 0;
+                var idCol = col < identifier[0].length ? col : 0;
+                var dtRow = row < date.length ? row : 0;
+                var dtCol = col < date[0].length ? col : 0;
+                
+                var id = identifier[idRow][idCol];
+                var dt = date[dtRow][dtCol];
                 resultRow.push(lookupValue(data, id, dt));
             }
             result.push(resultRow);
