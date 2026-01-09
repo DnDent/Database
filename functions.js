@@ -1,6 +1,6 @@
 /* global CustomFunctions, msal */
 
-CustomFunctions.associate("DATA", function (identifier, date) {
+CustomFunctions.associate("DATA", function (Identifier, Date) {
   try {
     var hasMsal = (typeof msal !== "undefined") && msal && msal.PublicClientApplication;
     var msg = hasMsal ? "MSAL_OK" : "MSAL_MISSING";
