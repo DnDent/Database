@@ -12,7 +12,7 @@
       "parameters": [
         { 
           "name": "identifier", 
-          "type": "any", 
+          "type": "any",
           "description": "The identifier"
         },
         { 
