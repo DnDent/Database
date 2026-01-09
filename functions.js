@@ -1,27 +1,29 @@
 /* global CustomFunctions */
-CustomFunctions.associate("DATA", function (identifier, date) {
-  var url = "https://vinhuys.sharepoint.com/sites/VinHuys/_api/web/lists/getbytitle('Vinhuys database')/items";
-  
-  var xhttp = new XMLHttpRequest();
-  return new Promise(function(resolve, reject) {
-    xhttp.onreadystatechange = function() {
-      if (xhttp.readyState !== 4) return;
-      
-      if (xhttp.status == 200) {
-        resolve([["Success! Status: 200"]]);
-      } else if (xhttp.status == 0) {
-        resolve([["ERROR: Status 0 - CORS or network issue"]]);
-      } else {
-        resolve([["ERROR: Status " + xhttp.status]]);
+
+var DATA_CACHE = null;
+var BLOB_URL = "https://vinhuysstorage.blob.core.windows.net/data/vinhuys.json?sp=r&st=2026-01-09T14:30:06Z&se=2027-01-09T22:45:06Z&spr=https&sv=2024-11-04&sr=b&sig=2j6d753ENDCFlkHpxZQcifIri54p2TEWYGS2jZjHTk8%3D";
+
+function loadData() {
+  if (DATA_CACHE) {
+    return Promise.resolve(DATA_CACHE);
+  }
+  return fetch(BLOB_URL)
+    .then(function(response) { return response.json(); })
+    .then(function(data) {
+      DATA_CACHE = data;
+      return data;
+    });
+}
+
+function getData(identifier, date) {
+  return loadData().then(function(data) {
+    for (var i = 0; i < data.length; i++) {
+      if (data[i].Identifier === identifier && data[i].Date === date) {
+        return data[i].Value;
       }
-    };
-    
-    xhttp.onerror = function() {
-      resolve([["ERROR: Network error occurred"]]);
-    };
-    
-    xhttp.open("GET", url, true);
-    xhttp.setRequestHeader("Accept", "application/json;odata=verbose");
-    xhttp.send();
+    }
+    return "Not found";
   });
-});
+}
+
+CustomFunctions.associate("DATA", getData);
