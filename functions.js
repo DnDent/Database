@@ -1,32 +1,14 @@
 /* global CustomFunctions, OfficeRuntime */
 
 var DATA_CACHE = null;
-var FUNCTION_URL = "https://vinhuys-function-crh8gsfwajc2d4dr.westeurope-01.azurewebsites.net";
-
-async function getAccessToken() {
-    try {
-        var token = await OfficeRuntime.auth.getAccessToken({
-            allowSignInPrompt: true,
-            allowConsentPrompt: true
-        });
-        return token;
-    } catch (error) {
-        throw new Error("Auth failed: " + error.message);
-    }
-}
+var FUNCTION_URL = "https://vinhuys-function-crh8gsfwajc2d4dr.westeurope-01.azurewebsites.net/api/getData";
 
 async function loadData() {
     if (DATA_CACHE) {
         return DATA_CACHE;
     }
 
-    var token = await getAccessToken();
-    
-    var response = await fetch(FUNCTION_URL, {
-        headers: {
-            'Authorization': 'Bearer ' + token
-        }
-    });
+    var response = await fetch(FUNCTION_URL);
 
     if (!response.ok) {
         var errorText = await response.text();
