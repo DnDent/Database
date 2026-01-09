@@ -1,25 +1,13 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/office-js/custom-functions.schema.json",
   "functions": [
     {
       "id": "DATA",
       "name": "DATA",
       "description": "Haalt Value op uit SharePoint op basis van Identifier en Date.",
-      "result": { 
-        "type": "any", 
-        "dimensionality": "matrix" 
-      },
+      "result": { "type": "any", "dimensionality": "matrix" },
       "parameters": [
-        { 
-          "name": "identifier", 
-          "type": "any",
-          "description": "The identifier"
-        },
-        { 
-          "name": "date", 
-          "type": "any",
-          "description": "The date"
-        }
+        { "name": "Identifier", "type": "any", "dimensionality": "matrix" },
+        { "name": "Date", "type": "any", "dimensionality": "matrix" }
       ]
     }
   ]
