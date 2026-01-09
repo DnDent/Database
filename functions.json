@@ -1,0 +1,14 @@
+{
+  "functions": [
+    {
+      "id": "TESLIN.DATA",
+      "name": "TESLIN.DATA",
+      "description": "Haalt Value op uit SharePoint op basis van Identifier en Date.",
+      "result": { "type": "any", "dimensionality": "matrix" },
+      "parameters": [
+        { "name": "Identifier", "type": "any", "dimensionality": "matrix" },
+        { "name": "Date", "type": "any", "dimensionality": "matrix" }
+      ]
+    }
+  ]
+}
