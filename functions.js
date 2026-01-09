@@ -1,4 +1,4 @@
-/* global CustomFunctions, OfficeRuntime */
+/* global CustomFunctions */
 
 var DATA_CACHE = null;
 var FUNCTION_URL = "https://vinhuys-function-crh8gsfwajc2d4dr.westeurope-01.azurewebsites.net/api/getData";
