@@ -4,15 +4,17 @@ function safeAssociate(name, fn) {
   try {
     CustomFunctions.associate(name, fn);
   } catch (e) {
-    // Ignore registration errors (e.g., name not in metadata)
+    // Ignore "not in metadata"/duplicate registration errors
   }
 }
 
-// Keep 2 params so it matches your JSON signature, but ignore them.
+// Keep 2 params (because your JSON defines 2 parameters),
+// and return a 2D array (because your JSON defines matrix output).
 function works(identifier, date) {
-  return "WORKS!";
+  return [["WORKS!"]];
 }
 
-// Register both just in case the metadata expects either variant
+// Register common name variants so you don’t have to think about caching/name wiring.
 safeAssociate("TESLIN.DATA", works);
 safeAssociate("DATA", works);
+safeAssociate("TESLIN.TESLIN.DATA", works);
