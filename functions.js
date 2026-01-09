@@ -8,10 +8,16 @@ CustomFunctions.associate("DATA", function (identifier, date) {
       if (xhttp.readyState !== 4) return;
       
       if (xhttp.status == 200) {
-        resolve([["Success! Status: " + xhttp.status]]);
+        resolve([["Success! Status: 200"]]);
+      } else if (xhttp.status == 0) {
+        resolve([["ERROR: Status 0 - CORS or network issue"]]);
       } else {
-        reject({ status: xhttp.status, statusText: xhttp.statusText });
+        resolve([["ERROR: Status " + xhttp.status]]);
       }
+    };
+    
+    xhttp.onerror = function() {
+      resolve([["ERROR: Network error occurred"]]);
     };
     
     xhttp.open("GET", url, true);
