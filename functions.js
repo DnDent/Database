@@ -33,23 +33,30 @@ async function getData(identifier, date) {
     try {
         var data = await loadData();
         
-        // Get dimensions - use MAX of both inputs
-        var numRows = Math.max(identifier.length, date.length);
-        var numCols = Math.max(identifier[0].length, date[0].length);
+        var idRows = identifier.length;
+        var idCols = identifier[0].length;
+        var dtRows = date.length;
+        var dtCols = date[0].length;
+        
+        // Check for dimension mismatch (unless one is a single cell)
+        var idIsSingle = (idRows === 1 && idCols === 1);
+        var dtIsSingle = (dtRows === 1 && dtCols === 1);
+        
+        if (!idIsSingle && !dtIsSingle && (idRows !== dtRows || idCols !== dtCols)) {
+            return [["Error: Dimension mismatch - ranges must be same size or single cell"]];
+        }
+        
+        // Use dimensions from the larger input (or the non-single one)
+        var numRows = Math.max(idRows, dtRows);
+        var numCols = Math.max(idCols, dtCols);
         
         // Build result matrix
         var result = [];
         for (var row = 0; row < numRows; row++) {
             var resultRow = [];
             for (var col = 0; col < numCols; col++) {
-                // If one input is smaller, reuse its value (e.g., single cell applies to all)
-                var idRow = row < identifier.length ? row : 0;
-                var idCol = col < identifier[0].length ? col : 0;
-                var dtRow = row < date.length ? row : 0;
-                var dtCol = col < date[0].length ? col : 0;
-                
-                var id = identifier[idRow][idCol];
-                var dt = date[dtRow][dtCol];
+                var id = idIsSingle ? identifier[0][0] : identifier[row][col];
+                var dt = dtIsSingle ? date[0][0] : date[row][col];
                 resultRow.push(lookupValue(data, id, dt));
             }
             result.push(resultRow);
