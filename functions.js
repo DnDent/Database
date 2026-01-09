@@ -1,7 +1,7 @@
 /* global CustomFunctions, OfficeRuntime */
 
 var DATA_CACHE = null;
-var FUNCTION_URL = "https://vinhuys-function.azurewebsites.net/api/getData";
+var FUNCTION_URL = "https://vinhuys-function-crh8gsfwajc2d4dr.westeurope-01.azurewebsites.net";
 
 async function getAccessToken() {
     try {
