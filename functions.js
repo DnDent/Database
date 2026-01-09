@@ -4,9 +4,15 @@ function safeAssociate(name, fn) {
   try {
     CustomFunctions.associate(name, fn);
   } catch (e) {
-    // Ignore "not in metadata" / duplicate registration errors
+    // Ignore registration errors (e.g., name not in metadata)
   }
 }
 
-safeAssociate("TESLIN.DATA", () => "WORKS!");
-safeAssociate("DATA", () => "WORKS!");
+// Keep 2 params so it matches your JSON signature, but ignore them.
+function works(identifier, date) {
+  return "WORKS!";
+}
+
+// Register both just in case the metadata expects either variant
+safeAssociate("TESLIN.DATA", works);
+safeAssociate("DATA", works);
