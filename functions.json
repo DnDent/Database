@@ -3,11 +3,11 @@
     {
       "id": "DATA",
       "name": "DATA",
-      "description": "Lookup value by Identifier and Date",
-      "result": { "type": "any" },
+      "description": "Lookup value by Identifier and Date. Accepts single values or ranges.",
+      "result": { "type": "any", "dimensionality": "matrix" },
       "parameters": [
-        { "name": "identifier", "type": "string", "description": "Row identifier" },
-        { "name": "date", "type": "string", "description": "Date (YYYY-MM-DD)" }
+        { "name": "identifier", "type": "any", "dimensionality": "matrix", "description": "Row identifier(s)" },
+        { "name": "date", "type": "any", "dimensionality": "matrix", "description": "Date(s) (YYYY-MM-DD)" }
       ]
     }
   ]
