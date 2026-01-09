@@ -8,7 +8,10 @@
       "parameters": [
         { "name": "Identifier", "type": "any", "dimensionality": "matrix" },
         { "name": "Date", "type": "any", "dimensionality": "matrix" }
-      ]
+      ],
+      "options": {
+        "cancelable": true
+      }
     }
   ]
 }
