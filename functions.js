@@ -3,9 +3,6 @@
 var DATA_CACHE = {};
 var FUNCTION_URL = "https://vinhuys-function-crh8gsfwajc2d4dr.westeurope-01.azurewebsites.net/api/getData";
 
-// Known source types that route to specific lists
-var KNOWN_SOURCES = ["fund", "positions", "trades", "benchmark", "benchmarks", "company", "companies"];
-
 async function loadData(listName) {
     if (DATA_CACHE[listName]) {
         return DATA_CACHE[listName];
@@ -99,37 +96,25 @@ function determineList(type) {
 
 async function teslinGet(entity, type, time, metric, version) {
     try {
-        // Get dimensions from all inputs
-        var entRows = entity.length;
-        var entCols = entity[0].length;
-        var typeRows = type.length;
-        var typeCols = type[0].length;
+        // Get dimensions from time and metric (the spilling parameters)
         var timeRows = time.length;
         var timeCols = time[0].length;
         var metRows = metric.length;
         var metCols = metric[0].length;
         
         // Check if inputs are single cells
-        var entIsSingle = (entRows === 1 && entCols === 1);
-        var typeIsSingle = (typeRows === 1 && typeCols === 1);
         var timeIsSingle = (timeRows === 1 && timeCols === 1);
         var metIsSingle = (metRows === 1 && metCols === 1);
         
-        // For spilling: time and metric are the ones that typically vary
-        // Entity and type are usually single values
+        // Determine orientation
+        var timeIsVertical = (timeRows > 1 && timeCols === 1);
+        var timeIsHorizontal = (timeRows === 1 && timeCols > 1);
+        var metIsVertical = (metRows > 1 && metCols === 1);
+        var metIsHorizontal = (metRows === 1 && metCols > 1);
         
-        // Dimension mismatch check for time and metric (the spilling parameters)
+        // DIMENSION MISMATCH CHECK
+        // Error only if: both are ranges, same orientation, different sizes
         if (!timeIsSingle && !metIsSingle) {
-            // Both are ranges - check if they're compatible
-            var timeSameOrientation = (timeRows > 1 && timeCols === 1) || (timeRows === 1 && timeCols > 1);
-            var metSameOrientation = (metRows > 1 && metCols === 1) || (metRows === 1 && metCols > 1);
-            
-            var timeIsVertical = timeRows > 1 && timeCols === 1;
-            var timeIsHorizontal = timeRows === 1 && timeCols > 1;
-            var metIsVertical = metRows > 1 && metCols === 1;
-            var metIsHorizontal = metRows === 1 && metCols > 1;
-            
-            // If same orientation and different sizes = error
             if (timeIsVertical && metIsVertical && timeRows !== metRows) {
                 return [["Error: Dimension mismatch"]];
             }
@@ -138,79 +123,69 @@ async function teslinGet(entity, type, time, metric, version) {
             }
         }
         
-        // Determine output dimensions based on time and metric orientation
+        // DETERMINE OUTPUT DIMENSIONS
         var numRows, numCols;
+        var matrixMode = false; // Flag to track if we're in matrix mode
         
         if (timeIsSingle && metIsSingle) {
+            // Both single: 1x1 output
             numRows = 1;
             numCols = 1;
         } else if (timeIsSingle) {
+            // Only metric varies: output matches metric shape
             numRows = metRows;
             numCols = metCols;
         } else if (metIsSingle) {
+            // Only time varies: output matches time shape
             numRows = timeRows;
             numCols = timeCols;
+        } else if (timeIsVertical && metIsHorizontal) {
+            // MATRIX MODE: time vertical, metric horizontal
+            // Output: rows = time count, cols = metric count
+            numRows = timeRows;
+            numCols = metCols;
+            matrixMode = true;
+        } else if (timeIsHorizontal && metIsVertical) {
+            // MATRIX MODE (transposed): time horizontal, metric vertical
+            // Output: rows = metric count, cols = time count
+            numRows = metRows;
+            numCols = timeCols;
+            matrixMode = true;
         } else {
-            // Both are ranges - create matrix based on orientation
-            var timeIsVertical = timeRows > 1 && timeCols === 1;
-            var metIsHorizontal = metRows === 1 && metCols > 1;
-            
-            if (timeIsVertical && metIsHorizontal) {
-                // Time vertical, metric horizontal = matrix
-                numRows = timeRows;
-                numCols = metCols;
-            } else if (!timeIsVertical && !metIsHorizontal) {
-                // Time horizontal, metric vertical = matrix (transposed)
-                numRows = metRows;
-                numCols = timeCols;
-            } else {
-                // Same orientation = paired lookup
-                numRows = Math.max(timeRows, metRows);
-                numCols = Math.max(timeCols, metCols);
-            }
+            // Same orientation: paired lookup (like old code)
+            numRows = Math.max(timeRows, metRows);
+            numCols = Math.max(timeCols, metCols);
         }
         
-        // Get the list name from type
+        // Get entity and type values (always use first cell)
+        var ent = entity[0][0];
         var typeValue = type[0][0];
         var listName = determineList(typeValue);
         
         // Load data from cache or API
         var data = await loadData(listName);
         
-        // Build result matrix
+        // BUILD RESULT MATRIX
         var result = [];
         for (var row = 0; row < numRows; row++) {
             var resultRow = [];
             for (var col = 0; col < numCols; col++) {
-                // Get entity value (usually single)
-                var ent = entIsSingle ? entity[0][0] : entity[Math.min(row, entRows - 1)][Math.min(col, entCols - 1)];
+                var t, m;
                 
-                // Get time value
-                var t;
-                if (timeIsSingle) {
-                    t = time[0][0];
-                } else if (timeRows > 1 && timeCols === 1) {
-                    // Vertical time range
-                    t = time[Math.min(row, timeRows - 1)][0];
-                } else if (timeRows === 1 && timeCols > 1) {
-                    // Horizontal time range
-                    t = time[0][Math.min(col, timeCols - 1)];
+                if (matrixMode) {
+                    // Matrix mode: time determines row, metric determines col
+                    if (timeIsVertical && metIsHorizontal) {
+                        t = time[row][0];
+                        m = metric[0][col];
+                    } else {
+                        // timeIsHorizontal && metIsVertical
+                        t = time[0][col];
+                        m = metric[row][0];
+                    }
                 } else {
-                    t = time[Math.min(row, timeRows - 1)][Math.min(col, timeCols - 1)];
-                }
-                
-                // Get metric value
-                var m;
-                if (metIsSingle) {
-                    m = metric[0][0];
-                } else if (metRows > 1 && metCols === 1) {
-                    // Vertical metric range
-                    m = metric[Math.min(row, metRows - 1)][0];
-                } else if (metRows === 1 && metCols > 1) {
-                    // Horizontal metric range
-                    m = metric[0][Math.min(col, metCols - 1)];
-                } else {
-                    m = metric[Math.min(row, metRows - 1)][Math.min(col, metCols - 1)];
+                    // Non-matrix mode: same logic as old working code
+                    t = timeIsSingle ? time[0][0] : time[row][col];
+                    m = metIsSingle ? metric[0][0] : metric[row][col];
                 }
                 
                 resultRow.push(lookupValue(data, ent, t, m, listName));
