@@ -20,7 +20,7 @@
     <Host Name="Workbook"/>
   </Hosts>
   <DefaultSettings>
-    <SourceLocation DefaultValue="https://dndent.github.io/Database/authentication.html"/>
+    <SourceLocation DefaultValue="https://dndent.github.io/Authentication/authentication.html"/>
   </DefaultSettings>
   <Permissions>ReadWriteDocument</Permissions>
   <VersionOverrides xmlns="http://schemas.microsoft.com/office/taskpaneappversionoverrides" xsi:type="VersionOverridesV1_0">
@@ -47,9 +47,9 @@
     </Hosts>
     <Resources>
       <bt:Urls>
-        <bt:Url id="Functions.Script.Url" DefaultValue="https://dndent.github.io/Database/authentication.js"/>
-        <bt:Url id="Functions.Metadata.Url" DefaultValue="https://dndent.github.io/Database/authentication.json"/>
-        <bt:Url id="Functions.Page.Url" DefaultValue="https://dndent.github.io/Database/authentication.html"/>
+        <bt:Url id="Functions.Script.Url" DefaultValue="https://dndent.github.io/Authentication/authentication.js"/>
+        <bt:Url id="Functions.Metadata.Url" DefaultValue="https://dndent.github.io/Authentication/authentication.json"/>
+        <bt:Url id="Functions.Page.Url" DefaultValue="https://dndent.github.io/Authentication/authentication.html"/>
       </bt:Urls>
       <bt:ShortStrings>
         <bt:String id="Functions.Namespace" DefaultValue="AUTHTEST"/>
@@ -57,11 +57,10 @@
     </Resources>
     <WebApplicationInfo>
       <Id>e9dc9cc4-67ae-48c6-a2e2-7e6343f869a9</Id>
-      <Resource>api://dndent.github.io/Database/e9dc9cc4-67ae-48c6-a2e2-7e6343f869a9</Resource>
+      <Resource>api://dndent.github.io/Authentication/e9dc9cc4-67ae-48c6-a2e2-7e6343f869a9</Resource>
       <Scopes>
         <Scope>User.Read</Scope>
       </Scopes>
     </WebApplicationInfo>
   </VersionOverrides>
-
 </OfficeApp>
