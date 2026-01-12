@@ -66,9 +66,18 @@ function formatDate(dateValue) {
 }
 
 function formatSharePointDate(spDate) {
-    // Convert SharePoint ISO date "2026-01-12T08:00:00Z" to "YYYY-MM-DD"
     if (!spDate) return "";
-    return spDate.split("T")[0];
+
+    // If it's already a date-only string, keep it
+    var s = String(spDate);
+    if (!s.includes("T")) return s;
+
+    // Convert ISO Z time to LOCAL date (fixes 23:00Z -> next day in CET)
+    var d = new Date(s);
+    var year = d.getFullYear();
+    var month = String(d.getMonth() + 1).padStart(2, "0");
+    var day = String(d.getDate()).padStart(2, "0");
+    return year + "-" + month + "-" + day;
 }
 
 function lookupValue(data, entity, time, metric, listName) {
