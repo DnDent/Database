@@ -29,13 +29,24 @@ function formatDate(dateValue) {
     if (typeof dateValue === "number") {
         var excelEpoch = new Date(1899, 11, 30);
         var date = new Date(excelEpoch.getTime() + dateValue * 86400000);
-        var day = String(date.getDate()).padStart(2, "0");
-        var month = String(date.getMonth() + 1).padStart(2, "0");
-        var year = date.getFullYear();
-        return day + "/" + month + "/" + year;
+        return date.toISOString().split("T")[0]; // Returns YYYY-MM-DD
     }
-    // Already a string
+    // Handle DD/MM/YYYY string from user input
+    if (typeof dateValue === "string" && dateValue.includes("/")) {
+        var parts = dateValue.split("/");
+        if (parts.length === 3) {
+            // DD/MM/YYYY -> YYYY-MM-DD
+            return parts[2] + "-" + parts[1].padStart(2, "0") + "-" + parts[0].padStart(2, "0");
+        }
+    }
+    // Already YYYY-MM-DD or other format
     return String(dateValue);
+}
+
+function formatSharePointDate(spDate) {
+    // Convert SharePoint ISO date "2026-01-12T08:00:00Z" to "YYYY-MM-DD"
+    if (!spDate) return "";
+    return spDate.split("T")[0];
 }
 
 function lookupValue(data, entity, time, metric, listName) {
@@ -46,8 +57,9 @@ function lookupValue(data, entity, time, metric, listName) {
         var match = false;
         
         if (listName === "Fund.data") {
-            // Match on Fund + NAV date
-            match = row.Fund === entity && formatDate(row.NAVdate) === formattedTime;
+            // Match on Identifier + Date
+            var rowDate = formatSharePointDate(row.Date);
+            match = row.Identifier === entity && rowDate === formattedTime;
         } else if (listName === "Companies") {
             // Match on Company + Period (and version if applicable)
             match = row.Company === entity && row.Period === time;
