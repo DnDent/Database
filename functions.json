@@ -1,13 +1,16 @@
 {
   "functions": [
     {
-      "id": "DATA",
-      "name": "DATA",
-      "description": "Lookup value by Identifier and Date. Accepts single values or ranges.",
+      "id": "GET",
+      "name": "GET",
+      "description": "Lookup value from Teslin database. Returns metric value for entity at given time.",
       "result": { "type": "any", "dimensionality": "matrix" },
       "parameters": [
-        { "name": "identifier", "type": "any", "dimensionality": "matrix", "description": "Row identifier(s)" },
-        { "name": "date", "type": "any", "dimensionality": "matrix", "description": "Date(s) (YYYY-MM-DD)" }
+        { "name": "entity", "type": "any", "dimensionality": "matrix", "description": "Entity name (e.g., fund name or company name)" },
+        { "name": "type", "type": "any", "dimensionality": "matrix", "description": "Data type: fund, positions, trades, benchmark, company - or model version for companies (e.g., Q4-2025-V1)" },
+        { "name": "time", "type": "any", "dimensionality": "matrix", "description": "Date (DD/MM/YYYY) or period (FY25, 1Q25)" },
+        { "name": "metric", "type": "any", "dimensionality": "matrix", "description": "Metric name (e.g., NAV, Revenue)" },
+        { "name": "version", "type": "any", "dimensionality": "matrix", "description": "Optional: Model version for companies (e.g., Q4-2025-V1)", "optional": true }
       ]
     }
   ]
