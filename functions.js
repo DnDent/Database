@@ -24,15 +24,18 @@ async function loadData(listName) {
 function formatDate(dateValue) {
     // Handle Excel date serial numbers
     if (typeof dateValue === "number") {
-        var excelEpoch = new Date(1899, 11, 30);
-        var date = new Date(excelEpoch.getTime() + dateValue * 86400000);
-        return date.toISOString().split("T")[0]; // Returns YYYY-MM-DD
+        var days = dateValue - 25569; // Days since Unix epoch
+        var ms = days * 86400000;
+        var date = new Date(ms);
+        var year = date.getUTCFullYear();
+        var month = String(date.getUTCMonth() + 1).padStart(2, "0");
+        var day = String(date.getUTCDate()).padStart(2, "0");
+        return year + "-" + month + "-" + day;
     }
     // Handle DD/MM/YYYY string from user input
     if (typeof dateValue === "string" && dateValue.includes("/")) {
         var parts = dateValue.split("/");
         if (parts.length === 3) {
-            // DD/MM/YYYY -> YYYY-MM-DD
             return parts[2] + "-" + parts[1].padStart(2, "0") + "-" + parts[0].padStart(2, "0");
         }
     }
@@ -125,34 +128,29 @@ async function teslinGet(entity, type, time, metric, version) {
         
         // DETERMINE OUTPUT DIMENSIONS
         var numRows, numCols;
-        var matrixMode = false; // Flag to track if we're in matrix mode
+        var matrixMode = false;
         
         if (timeIsSingle && metIsSingle) {
-            // Both single: 1x1 output
             numRows = 1;
             numCols = 1;
         } else if (timeIsSingle) {
-            // Only metric varies: output matches metric shape
             numRows = metRows;
             numCols = metCols;
         } else if (metIsSingle) {
-            // Only time varies: output matches time shape
             numRows = timeRows;
             numCols = timeCols;
         } else if (timeIsVertical && metIsHorizontal) {
             // MATRIX MODE: time vertical, metric horizontal
-            // Output: rows = time count, cols = metric count
             numRows = timeRows;
             numCols = metCols;
             matrixMode = true;
         } else if (timeIsHorizontal && metIsVertical) {
             // MATRIX MODE (transposed): time horizontal, metric vertical
-            // Output: rows = metric count, cols = time count
             numRows = metRows;
             numCols = timeCols;
             matrixMode = true;
         } else {
-            // Same orientation: paired lookup (like old code)
+            // Same orientation: paired lookup
             numRows = Math.max(timeRows, metRows);
             numCols = Math.max(timeCols, metCols);
         }
@@ -173,17 +171,14 @@ async function teslinGet(entity, type, time, metric, version) {
                 var t, m;
                 
                 if (matrixMode) {
-                    // Matrix mode: time determines row, metric determines col
                     if (timeIsVertical && metIsHorizontal) {
                         t = time[row][0];
                         m = metric[0][col];
                     } else {
-                        // timeIsHorizontal && metIsVertical
                         t = time[0][col];
                         m = metric[row][0];
                     }
                 } else {
-                    // Non-matrix mode: same logic as old working code
                     t = timeIsSingle ? time[0][0] : time[row][col];
                     m = metIsSingle ? metric[0][0] : metric[row][col];
                 }
