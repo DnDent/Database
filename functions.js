@@ -1,15 +1,37 @@
-/* global CustomFunctions */
+/* global CustomFunctions, OfficeRuntime */
 
 var DATA_CACHE = {};
+var TOKEN_CACHE = null;
 var FUNCTION_URL = "https://vinhuys-function-crh8gsfwajc2d4dr.westeurope-01.azurewebsites.net/api/getData";
+
+async function getToken() {
+    if (TOKEN_CACHE) {
+        return TOKEN_CACHE;
+    }
+    
+    var token = await OfficeRuntime.auth.getAccessToken({
+        allowSignInPrompt: true,
+        allowConsentPrompt: true
+    });
+    
+    TOKEN_CACHE = token;
+    return token;
+}
 
 async function loadData(listName) {
     if (DATA_CACHE[listName]) {
         return DATA_CACHE[listName];
     }
 
+    // Get SSO token
+    var token = await getToken();
+    
     var url = FUNCTION_URL + "?list=" + encodeURIComponent(listName);
-    var response = await fetch(url);
+    var response = await fetch(url, {
+        headers: {
+            "Authorization": "Bearer " + token
+        }
+    });
 
     if (!response.ok) {
         var errorText = await response.text();
@@ -160,7 +182,7 @@ async function teslinGet(entity, type, time, metric, version) {
         var typeValue = type[0][0];
         var listName = determineList(typeValue);
         
-        // Load data from cache or API
+        // Load data from cache or API (now with authentication)
         var data = await loadData(listName);
         
         // BUILD RESULT MATRIX
